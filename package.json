@@ -1,0 +1,19 @@
+{
+  "name": "accounting-docs-automation",
+  "version": "1.0.0",
+  "description": "給与明細書・出張報告書の自動入力・ダウンロード",
+  "scripts": {
+    "download-payslip":        "npx ts-node src/download-payslip.ts",
+    "download-business-trip":  "npx ts-node src/run-business-trip.ts",
+    "extract-trip-from-email": "npx ts-node src/extract-from-email.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.0"
+  }
+}

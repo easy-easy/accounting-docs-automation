@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# 実際の入力データ（個人・会社情報を含むため除外）
+src/payslip-config.ts
+src/business-trip-config.ts
+src/run-business-trip.ts
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Test and coverage outputs
+coverage/
+.playwright/
+playwright-report/
+test-results/
+
+# Runtime downloads/artifacts
+downloads/
+emails/
+.playwright-mcp/
+
+# Local AI/tooling settings
+.codex/
+.claude/settings.local.json
+
+# macOS
+.DS_Store
