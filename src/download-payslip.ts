@@ -24,9 +24,10 @@ async function downloadPayslip(data: PayslipData): Promise<string> {
       "https://keiei-support-plus-a.com/kyuuyo-pippa/kyuyomeisai-template/",
       { waitUntil: "networkidle", timeout: 30000 }
     );
-    await page.waitForFunction(() => typeof (window as any).jspdf !== "undefined", {
-      timeout: 15000,
-    });
+    await page.waitForFunction(
+      () => typeof (window as any).jspdf !== "undefined" && typeof (window as any).html2canvas !== "undefined",
+      { timeout: 15000 }
+    );
 
     console.log("フォームに入力しています...");
 
@@ -36,10 +37,9 @@ async function downloadPayslip(data: PayslipData): Promise<string> {
     // datepicker は JS で直接セットして change イベントを発火
     await page.evaluate((val: string) => {
       const el = document.querySelector<HTMLInputElement>("#data_3");
-      if (el) {
-        el.value = val;
-        el.dispatchEvent(new Event("change", { bubbles: true }));
-      }
+      if (!el) throw new Error("#data_3 (給与支給月) が見つかりません");
+      el.value = val;
+      el.dispatchEvent(new Event("change", { bubbles: true }));
     }, data.paymentMonth);
 
     // 勤怠項目
@@ -98,8 +98,9 @@ async function downloadPayslip(data: PayslipData): Promise<string> {
       page.click(".savePdfBut"),
     ]);
 
-    const suggestedFilename = download.suggestedFilename();
-    const savePath = path.join(downloadDir, suggestedFilename || "給与明細書.pdf");
+    const rawName = download.suggestedFilename() || "給与明細書.pdf";
+    const safeName = path.basename(rawName).replace(/[/\\:*?"<>|]/g, "_");
+    const savePath = path.join(downloadDir, safeName);
     await download.saveAs(savePath);
     console.log(`\n✅ PDF を保存しました: ${savePath}`);
     return savePath;

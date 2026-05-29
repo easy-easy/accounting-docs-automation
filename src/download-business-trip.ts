@@ -31,16 +31,19 @@ export async function downloadBusinessTrip(data: BusinessTripData): Promise<stri
       "https://keiei-support-plus-a.com/zeirishi-hiyou/shucchou-houkokusho-template/",
       { waitUntil: "networkidle", timeout: 30000 }
     );
-    await page.waitForFunction(() => typeof (window as any).jspdf !== "undefined", {
-      timeout: 15000,
-    });
+    await page.waitForFunction(
+      () => typeof (window as any).jspdf !== "undefined" && typeof (window as any).html2canvas !== "undefined",
+      { timeout: 15000 }
+    );
 
     console.log("フォームに入力しています...");
 
     // 報告日（datepicker）
     await page.evaluate((val: string) => {
       const el = document.querySelector<HTMLInputElement>("#data_1");
-      if (el) { el.value = val; el.dispatchEvent(new Event("change", { bubbles: true })); }
+      if (!el) throw new Error("#data_1 (報告日) が見つかりません");
+      el.value = val;
+      el.dispatchEvent(new Event("change", { bubbles: true }));
     }, reportDate);
 
     // 会社名・氏名
@@ -50,11 +53,13 @@ export async function downloadBusinessTrip(data: BusinessTripData): Promise<stri
     // 出発日・帰宅日をセットしてから change を発火 → data_6（日数）と data_8（合計）が自動計算される
     await page.evaluate((dep: string) => {
       const el = document.querySelector<HTMLInputElement>("#data_4");
-      if (el) el.value = dep;
+      if (!el) throw new Error("#data_4 (出発日) が見つかりません");
+      el.value = dep;
     }, data.departureDate);
     await page.evaluate((ret: string) => {
       const el = document.querySelector<HTMLInputElement>("#data_5");
-      if (el) el.value = ret;
+      if (!el) throw new Error("#data_5 (帰宅日) が見つかりません");
+      el.value = ret;
     }, data.returnDate);
 
     // 旅費日当額をセット（あれば）
@@ -82,8 +87,9 @@ export async function downloadBusinessTrip(data: BusinessTripData): Promise<stri
       page.click("#exportPdf"),
     ]);
 
-    const suggestedFilename = download.suggestedFilename();
-    const savePath = path.join(downloadDir, suggestedFilename || "出張報告書.pdf");
+    const rawName = download.suggestedFilename() || "出張報告書.pdf";
+    const safeName = path.basename(rawName).replace(/[/\\:*?"<>|]/g, "_");
+    const savePath = path.join(downloadDir, safeName);
     await download.saveAs(savePath);
     console.log(`\n✅ PDF を保存しました: ${savePath}`);
     return savePath;

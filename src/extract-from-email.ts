@@ -21,6 +21,27 @@ async function readStdin(): Promise<string> {
   return lines.join("\n");
 }
 
+function validateExtractedTripData(data: ExtractedTripData): void {
+  const dateRegex = /^\d{4}\/\d{2}\/\d{2}$/;
+  if (!data.departureDate || !dateRegex.test(data.departureDate)) {
+    throw new Error(`出発日の形式が不正です: "${data.departureDate}" (YYYY/MM/DD 形式が必要です)`);
+  }
+  if (!data.returnDate || !dateRegex.test(data.returnDate)) {
+    throw new Error(`帰宅日の形式が不正です: "${data.returnDate}" (YYYY/MM/DD 形式が必要です)`);
+  }
+  if (!data.destination?.trim()) {
+    throw new Error("行先が空です");
+  }
+  if (!data.purpose?.trim()) {
+    throw new Error("目的が空です");
+  }
+  const dep = new Date(data.departureDate.replace(/\//g, "-"));
+  const ret = new Date(data.returnDate.replace(/\//g, "-"));
+  if (ret < dep) {
+    throw new Error(`帰宅日 (${data.returnDate}) が出発日 (${data.departureDate}) より前です`);
+  }
+}
+
 async function extractTripData(emailContent: string): Promise<ExtractedTripData> {
   console.log("Claude でメールを解析中...");
 
@@ -92,6 +113,7 @@ async function extractTripData(emailContent: string): Promise<ExtractedTripData>
   }
 
   const extracted = toolUse.input as ExtractedTripData;
+  validateExtractedTripData(extracted);
 
   console.log("\n--- 抽出結果 ---");
   console.log(`  出発日  : ${extracted.departureDate}`);
