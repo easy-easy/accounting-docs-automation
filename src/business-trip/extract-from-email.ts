@@ -1,9 +1,9 @@
 import Anthropic from "@anthropic-ai/sdk";
 import * as fs from "fs";
 import * as readline from "readline";
-import { ExtractedTripData, BusinessTripData } from "./types";
-import { businessTripConfig } from "./business-trip-config";
-import { downloadBusinessTrip } from "./download-business-trip";
+import { ExtractedTripData, BusinessTripData } from "../types";
+import { businessTripConfig } from "./config";
+import { downloadBusinessTrip } from "./download";
 
 const client = new Anthropic();
 

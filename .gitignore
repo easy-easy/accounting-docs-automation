@@ -14,9 +14,9 @@ pnpm-debug.log*
 *.log
 
 # 実際の入力データ（個人・会社情報を含むため除外）
-src/payslip-config.ts
-src/business-trip-config.ts
-src/run-business-trip.ts
+src/payslip/config.ts
+src/business-trip/config.ts
+src/business-trip/run.ts
 
 # Environment files
 .env

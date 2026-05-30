@@ -1,4 +1,4 @@
-import { PayslipData } from "./types";
+import { PayslipData } from "../types";
 
 const now = new Date();
 const paymentMonth = `${now.getFullYear()}年${now.getMonth() + 1}月`;

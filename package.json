@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "給与明細書・出張報告書の自動入力・ダウンロード",
   "scripts": {
-    "download-payslip":        "npx ts-node src/download-payslip.ts",
-    "download-business-trip":  "npx ts-node src/run-business-trip.ts",
-    "extract-trip-from-email": "npx ts-node src/extract-from-email.ts"
+    "download-payslip":        "npx ts-node src/payslip/download.ts",
+    "download-business-trip":  "npx ts-node src/business-trip/run.ts",
+    "extract-trip-from-email": "npx ts-node src/business-trip/extract-from-email.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0"

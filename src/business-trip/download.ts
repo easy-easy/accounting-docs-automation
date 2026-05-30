@@ -1,7 +1,7 @@
 import { chromium } from "@playwright/test";
 import * as path from "path";
 import * as fs from "fs";
-import { BusinessTripData } from "./types";
+import { BusinessTripData } from "../types";
 
 function formatDate(date: Date): string {
   const y = date.getFullYear();
@@ -12,7 +12,7 @@ function formatDate(date: Date): string {
 
 export async function downloadBusinessTrip(data: BusinessTripData): Promise<string> {
   const reportDate = data.reportDate ?? formatDate(new Date());
-  const downloadDir = path.resolve(__dirname, "../downloads");
+  const downloadDir = path.resolve(__dirname, "../../downloads");
   fs.mkdirSync(downloadDir, { recursive: true });
 
   const browser = await chromium.launch({

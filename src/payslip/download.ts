@@ -1,11 +1,11 @@
 import { chromium } from "@playwright/test";
 import * as path from "path";
 import * as fs from "fs";
-import { PayslipData } from "./types";
-import { payslipData } from "./payslip-config";
+import { PayslipData } from "../types";
+import { payslipData } from "./config";
 
 async function downloadPayslip(data: PayslipData): Promise<string> {
-  const downloadDir = path.resolve(__dirname, "../downloads");
+  const downloadDir = path.resolve(__dirname, "../../downloads");
   fs.mkdirSync(downloadDir, { recursive: true });
 
   const browser = await chromium.launch({
