@@ -27,10 +27,10 @@ npx playwright install chromium
 ### 設定ファイルの準備
 
 ```bash
-cp src/payslip-config.example.ts src/payslip-config.ts
+cp src/payslip/config.example.ts src/payslip/config.ts
 ```
 
-`src/payslip-config.ts` を自分の情報に編集してください（個人情報を含むため gitignore 済み）。
+`src/payslip/config.ts` を自分の情報に編集してください（個人情報を含むため gitignore 済み）。
 
 ### 実行
 
@@ -70,15 +70,14 @@ npm run download-payslip
 ### 設定ファイルの準備
 
 ```bash
-cp src/business-trip-config.example.ts src/business-trip-config.ts
-cp src/run-business-trip.ts src/run-business-trip.ts  # すでに gitignore 済み
+cp src/business-trip/config.example.ts src/business-trip/config.ts
 ```
 
-`src/business-trip-config.ts` に会社名・氏名・旅費日当額を設定してください。
+`src/business-trip/config.ts` に会社名・氏名・旅費日当額を設定してください。
 
 ### 実行方法 A: 手動入力
 
-`src/run-business-trip.ts` の `tripData` を直接編集して実行します。
+`src/business-trip/run.ts` の `tripData` を直接編集して実行します。
 
 ```bash
 npm run download-business-trip
@@ -113,6 +112,7 @@ npm run extract-trip-from-email -- emails/booking.txt
 
 `downloads/` に `YYYY年M月D日_出張報告書（{会社名}）.pdf` が保存されます。
 
+// TODO
 ### メールの例（複数まとめて貼り付けも可）
 
 ```
@@ -150,19 +150,21 @@ npm run extract-trip-from-email -- emails/booking.txt
 ```
 .
 ├── src/
-│   ├── types.ts                         # 型定義（PayslipData / BusinessTripData）
+│   ├── types.ts                              # 型定義（PayslipData / BusinessTripData）
 │   │
-│   ├── download-payslip.ts              # 給与明細書 Playwright 自動化
-│   ├── payslip-config.ts                # 給与明細入力データ ※gitignore
-│   ├── payslip-config.example.ts        # テンプレート
+│   ├── payslip/
+│   │   ├── config.ts                         # 給与明細入力データ ※gitignore
+│   │   ├── config.example.ts                 # テンプレート
+│   │   └── download.ts                       # Playwright 自動化（エントリーポイント）
 │   │
-│   ├── download-business-trip.ts        # 出張報告書 Playwright 自動化
-│   ├── run-business-trip.ts             # 手動実行エントリーポイント ※gitignore
-│   ├── extract-from-email.ts            # Claude API メール解析 + 自動実行
-│   ├── business-trip-config.ts          # 固定設定（会社名・氏名等） ※gitignore
-│   └── business-trip-config.example.ts  # テンプレート
+│   └── business-trip/
+│       ├── config.ts                         # 固定設定（会社名・氏名等） ※gitignore
+│       ├── config.example.ts                 # テンプレート
+│       ├── download.ts                       # Playwright 自動化
+│       ├── run.ts                            # 手動実行エントリーポイント ※gitignore
+│       └── extract-from-email.ts             # Claude API メール解析 + 自動実行
 │
-├── downloads/                            # 生成 PDF の保存先（自動作成）※gitignore
+├── downloads/                                # 生成 PDF の保存先（自動作成）※gitignore
 ├── .gitignore
 ├── package.json
 └── tsconfig.json
