@@ -12,7 +12,7 @@ function formatDate(date: Date): string {
 }
 
 export async function downloadBusinessTrip(data: BusinessTripData): Promise<string> {
-  const reportDate = data.reportDate ?? formatDate(new Date());
+  const reportDate = data.reportDate ?? data.returnDate ?? formatDate(new Date());
   const dailyAllowance = resolveDailyAllowance({
     dailyAllowance: data.dailyAllowance,
     allowancePattern: data.allowancePattern,
@@ -75,8 +75,9 @@ export async function downloadBusinessTrip(data: BusinessTripData): Promise<stri
       await page.fill("#data_7", dailyAllowance);
     }
 
-    // data_5 の change を発火 → 日数と旅費合計が計算される
+    // data_4, data_5 の change を発火 → 日数と旅費合計が計算される
     await page.evaluate(() => {
+      (window as any).$("#data_4").trigger("change");
       (window as any).$("#data_5").trigger("change");
     });
 
