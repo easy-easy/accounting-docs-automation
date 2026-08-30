@@ -14,5 +14,8 @@ export const businessTripConfig = {
   defaultTripType: "domestic" as TripType, // デフォルトの出張種別 ("domestic" | "overseas")
   // 旅費日当額を固定指定したい場合は数値を設定（未設定の場合は旅費規程・日程パターンに基づき自動計算されます）
   // dailyAllowance: "7500",
+  // メールに出張目的・内容の記載がない場合、AI がこの文言を自動記入します。
+  defaultPurpose: "システム開発・技術調査",
+  defaultDetails: "行先宿泊施設にて開発作業・技術調査を実施。",
 };
 

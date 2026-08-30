@@ -60,9 +60,9 @@ async function extractTripData(emailContent: string): Promise<ExtractedTripData>
 
 【行先】新幹線の目的駅や宿泊地の都市名・国名（例: 大阪府大阪市、東京都千代田区、アメリカ・サンフランシスコ）
 
-【目的】メールから推測できる場合は記載、不明な場合は「出張」とする
+【目的】メールから明記または合理的に推測できる場合は記載してください。記載・推測ができない場合は、設定された既定の目的「${businessTripConfig.defaultPurpose}」をそのまま設定してください。
 
-【詳細】予約番号・交通手段（新幹線〇号車、フライト便名など）・宿泊先名などの主要情報を簡潔にまとめる
+【詳細】予約番号・交通手段（新幹線〇号車、フライト便名など）・宿泊先名などの主要情報を簡潔にまとめてください。出張内容に関する記載がない場合は、設定された既定の内容「${businessTripConfig.defaultDetails}」をそのまま設定してください。
 
 複数のメールが含まれる場合は全体を通じて整合的な出張情報として抽出してください。`,
         cache_control: { type: "ephemeral" },
@@ -121,6 +121,8 @@ async function extractTripData(emailContent: string): Promise<ExtractedTripData>
   }
 
   const extracted = toolUse.input as ExtractedTripData;
+  extracted.purpose = extracted.purpose?.trim() || businessTripConfig.defaultPurpose;
+  extracted.details = extracted.details?.trim() || businessTripConfig.defaultDetails;
   validateExtractedTripData(extracted);
 
   const pattern = determineAllowancePattern(
