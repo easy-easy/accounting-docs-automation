@@ -2,6 +2,7 @@ import { chromium } from "@playwright/test";
 import * as path from "path";
 import * as fs from "fs";
 import { BusinessTripData } from "../types";
+import { resolveDailyAllowance } from "./regulations";
 
 function formatDate(date: Date): string {
   const y = date.getFullYear();
@@ -12,6 +13,13 @@ function formatDate(date: Date): string {
 
 export async function downloadBusinessTrip(data: BusinessTripData): Promise<string> {
   const reportDate = data.reportDate ?? formatDate(new Date());
+  const dailyAllowance = resolveDailyAllowance({
+    dailyAllowance: data.dailyAllowance,
+    allowancePattern: data.allowancePattern,
+    tripType: data.tripType,
+    departureDate: data.departureDate,
+    returnDate: data.returnDate,
+  });
   const downloadDir = path.resolve(__dirname, "../../downloads");
   fs.mkdirSync(downloadDir, { recursive: true });
 
@@ -62,9 +70,9 @@ export async function downloadBusinessTrip(data: BusinessTripData): Promise<stri
       el.value = ret;
     }, data.returnDate);
 
-    // 旅費日当額をセット（あれば）
-    if (data.dailyAllowance) {
-      await page.fill("#data_7", data.dailyAllowance);
+    // 旅費日当額をセット（規程に基づく計算値または指定値）
+    if (dailyAllowance) {
+      await page.fill("#data_7", dailyAllowance);
     }
 
     // data_5 の change を発火 → 日数と旅費合計が計算される

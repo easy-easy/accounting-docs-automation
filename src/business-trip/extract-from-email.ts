@@ -4,6 +4,7 @@ import * as readline from "readline";
 import { ExtractedTripData, BusinessTripData } from "../types";
 import { businessTripConfig } from "./config";
 import { downloadBusinessTrip } from "./download";
+import { resolveDailyAllowance, ALLOWANCE_PATTERNS, determineAllowancePattern } from "./regulations";
 
 const client = new Anthropic();
 
@@ -51,15 +52,17 @@ async function extractTripData(emailContent: string): Promise<ExtractedTripData>
     system: [
       {
         type: "text",
-        text: `あなたは新幹線・ホテルなどの出張予約確認メールから、出張報告書に必要な情報を抽出するアシスタントです。
+        text: `あなたは新幹線・航空機・ホテルなどの出張予約確認メールから、出張報告書に必要な情報を抽出するアシスタントです。
 
 【日付フォーマット】YYYY/MM/DD 形式で返してください（例: 2026/06/10）
 
-【行先】新幹線の目的駅や宿泊地の都市名（例: 大阪府大阪市、東京都千代田区）
+【出張種別 (tripType)】行先や交通機関から「domestic」（国内出張）または「overseas」（海外出張）を判定してください。
+
+【行先】新幹線の目的駅や宿泊地の都市名・国名（例: 大阪府大阪市、東京都千代田区、アメリカ・サンフランシスコ）
 
 【目的】メールから推測できる場合は記載、不明な場合は「出張」とする
 
-【詳細】予約番号・交通手段（新幹線〇号車など）・宿泊先名などの主要情報を簡潔にまとめる
+【詳細】予約番号・交通手段（新幹線〇号車、フライト便名など）・宿泊先名などの主要情報を簡潔にまとめる
 
 複数のメールが含まれる場合は全体を通じて整合的な出張情報として抽出してください。`,
         cache_control: { type: "ephemeral" },
@@ -86,9 +89,14 @@ async function extractTripData(emailContent: string): Promise<ExtractedTripData>
               type: "string",
               description: "出張帰宅日 YYYY/MM/DD形式",
             },
+            tripType: {
+              type: "string",
+              enum: ["domestic", "overseas"],
+              description: "出張種別: domestic (国内) または overseas (海外)",
+            },
             destination: {
               type: "string",
-              description: "出張の行先（例: 大阪府大阪市）",
+              description: "出張の行先（例: 大阪府大阪市、アメリカ・サンフランシスコ）",
             },
             purpose: {
               type: "string",
@@ -115,12 +123,21 @@ async function extractTripData(emailContent: string): Promise<ExtractedTripData>
   const extracted = toolUse.input as ExtractedTripData;
   validateExtractedTripData(extracted);
 
+  const pattern = determineAllowancePattern(
+    extracted.tripType ?? "domestic",
+    extracted.departureDate,
+    extracted.returnDate
+  );
+  const patternInfo = ALLOWANCE_PATTERNS[pattern];
+
   console.log("\n--- 抽出結果 ---");
-  console.log(`  出発日  : ${extracted.departureDate}`);
-  console.log(`  帰宅日  : ${extracted.returnDate}`);
-  console.log(`  行先    : ${extracted.destination}`);
-  console.log(`  目的    : ${extracted.purpose}`);
-  if (extracted.details) console.log(`  詳細    : ${extracted.details}`);
+  console.log(`  出発日    : ${extracted.departureDate}`);
+  console.log(`  帰宅日    : ${extracted.returnDate}`);
+  console.log(`  出張区分  : ${extracted.tripType === "overseas" ? "海外" : "国内"}`);
+  console.log(`  日当規程  : ${patternInfo.label}（${patternInfo.amount.toLocaleString()}円/日）`);
+  console.log(`  行先      : ${extracted.destination}`);
+  console.log(`  目的      : ${extracted.purpose}`);
+  if (extracted.details) console.log(`  詳細      : ${extracted.details}`);
   console.log("----------------\n");
 
   return extracted;
@@ -149,11 +166,20 @@ async function main() {
 
   const extracted = await extractTripData(emailContent);
 
+  const tripType = extracted.tripType ?? (businessTripConfig as any).defaultTripType ?? "domestic";
+  const dailyAllowance = resolveDailyAllowance({
+    dailyAllowance: (businessTripConfig as any).dailyAllowance,
+    tripType,
+    departureDate: extracted.departureDate,
+    returnDate: extracted.returnDate,
+  });
+
   const tripData: BusinessTripData = {
     reportDate: formatDate(new Date()),
     companyName: businessTripConfig.companyName,
     reporterName: businessTripConfig.reporterName,
-    dailyAllowance: businessTripConfig.dailyAllowance,
+    tripType,
+    dailyAllowance,
     ...extracted,
   };
 

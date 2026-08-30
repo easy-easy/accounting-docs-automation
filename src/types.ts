@@ -34,20 +34,34 @@ export interface PayslipData {
 
 // ===== 出張報告書 =====
 
+export type TripType = 'domestic' | 'overseas';
+export type StayType = 'day_trip' | 'overnight';
+
+export type TripAllowancePattern =
+  | 'domestic_day_trip'   // 国内・日帰り (4,000円)
+  | 'domestic_overnight'  // 国内・宿泊 (7,500円/日)
+  | 'overseas_day_trip'   // 海外・日帰り (8,000円)
+  | 'overseas_overnight'; // 海外・宿泊 (15,000円/日)
+
 export interface BusinessTripData {
-  reportDate?: string;      // 報告日 YYYY/MM/DD（省略時は実行当日）
-  companyName: string;      // 会社名
-  reporterName: string;     // 氏名
-  departureDate: string;    // 出張出発日 YYYY/MM/DD
-  returnDate: string;       // 出張帰宅日 YYYY/MM/DD
-  dailyAllowance?: string;  // 旅費日当額（例: "5000"）
-  destination: string;      // 出張の行先
-  purpose: string;          // 出張の目的
-  details?: string;         // 出張の内容（詳細）
+  reportDate?: string;                // 報告日 YYYY/MM/DD（省略時は実行当日）
+  companyName: string;                // 会社名
+  reporterName: string;               // 氏名
+  departureDate: string;              // 出張出発日 YYYY/MM/DD
+  returnDate: string;                 // 出張帰宅日 YYYY/MM/DD
+  dailyAllowance?: string;            // 旅費日当額（例: "7500"）。未指定時はパターンや日程から自動算出
+  allowancePattern?: TripAllowancePattern; // 日当パターン明示指定
+  tripType?: TripType;                // 出張種別（国内/海外、省略時は domestic）
+  destination: string;                // 出張の行先
+  purpose: string;                    // 出張の目的
+  details?: string;                   // 出張の内容（詳細）
 }
 
 // Claude API による抽出結果（固定フィールドを除いた部分）
 export type ExtractedTripData = Pick<
   BusinessTripData,
   'departureDate' | 'returnDate' | 'destination' | 'purpose' | 'details'
->;
+> & {
+  tripType?: TripType;
+  allowancePattern?: TripAllowancePattern;
+};
