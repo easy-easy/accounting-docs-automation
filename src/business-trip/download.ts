@@ -89,6 +89,23 @@ export async function downloadBusinessTrip(data: BusinessTripData): Promise<stri
     await page.keyboard.press("Tab");
     await page.waitForTimeout(500);
 
+    // テーブルに備考行を追加
+    console.log("備考欄を追加しています...");
+    await page.evaluate(() => {
+      const table = document.querySelector("#table-field tbody");
+      if (!table) throw new Error("テーブルが見つかりません");
+      
+      // 備考行を作成
+      const remarksRow = document.createElement("tr");
+      remarksRow.innerHTML = `
+        <th>備考</th>
+        <td colspan="3" style="text-align: left;">出張手当は非課税支給</td>
+      `;
+      
+      // テーブルの最後に追加
+      table.appendChild(remarksRow);
+    });
+
     console.log("PDFを生成しています...");
 
     const [download] = await Promise.all([
