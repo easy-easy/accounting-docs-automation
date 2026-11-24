@@ -1,5 +1,9 @@
 {
     "chat.tools.terminal.autoApprove": {
-        "npm run download-payslip": true
+        "npm run download-payslip": true,
+        "/^npm run download-business-trip$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
     }
 }
